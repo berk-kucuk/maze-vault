@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Maze Vault</title>
+  <!-- Maze Vault: the Maze family's square frame around a lit password field —
+       three masked characters and the caret, the one thing every password
+       manager is about. Black and white. -->
+  <defs>
+    <radialGradient id="mv-glow" cx="512" cy="512" r="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.26"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mv-lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#cfcfd8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="220" fill="#000"/>
+  <circle cx="512" cy="512" r="360" fill="url(#mv-glow)"/>
+  <rect x="245" y="245" width="534" height="534" fill="none" stroke="#f2f2f4"
+        stroke-width="46" stroke-linejoin="miter"/>
+  <rect x="318" y="428" width="388" height="168" fill="url(#mv-lit)"/>
+  <g stroke="#000" stroke-width="24" stroke-linecap="round">
+    <path d="M384 470V554M347.6 491L420.4 533M347.6 533L420.4 491"/>
+    <path d="M484 470V554M447.6 491L520.4 533M447.6 533L520.4 491"/>
+    <path d="M584 470V554M547.6 491L620.4 533M547.6 533L620.4 491"/>
+  </g>
+  <rect x="652" y="458" width="20" height="108" fill="#000"/>
+</svg>

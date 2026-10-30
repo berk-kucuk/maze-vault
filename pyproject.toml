@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maze-vault"
+version = "0.1.1"
+description = "Maze Vault — a Bitwarden/Vaultwarden-compatible password manager"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "berkkucukk", email = "berkkucukk@proton.me" }]
+dependencies = ["PyQt6>=6.6.0", "cryptography>=44"]
+
+[project.urls]
+Homepage = "https://mazelinux.berkkucukk.com.tr"
+
+[project.scripts]
+maze-vault = "mazevault.gui.app:run"
+
+[tool.setuptools.packages.find]
+include = ["mazevault*"]

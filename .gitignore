@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# virtualenv
+.venv/
+venv/
+
+# tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# makepkg output (build-pkg.sh)
+dist-pkg/
+*.pkg.tar.*
+*.src.tar.*
+pkg/
+src/
+
+# editors / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# local tooling
+.claude/
+*.log
+
+# Vault exports and test servers must never end up in the repository.
+*.vault.json
+.vaultwarden-test/
+*.part-*
+
+# secrets that must never be committed
+.env
+.env.*
+*.pem
+*.p12
+*.key
+*.gpg
+.devtools/
