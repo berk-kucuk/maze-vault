@@ -295,6 +295,37 @@ def snapshot(info: AccountInfo, data: dict | None) -> None:
             pass
 
 
+def forget_in_history(info: AccountInfo, cid: str) -> int:
+    """Remove one item from every history snapshot (audit V1).
+
+    Snapshots keep the previous encrypted states so a bad sync or edit can be
+    undone — which also kept an item deleted "forever" on disk for the next
+    HISTORY_KEEP saves, and in the vault file's own .bak until the next save.
+    Entries are matched by id; nothing is decrypted.
+    Returns how many snapshots changed.
+    """
+    changed = 0
+    # The previous state of the vault file itself is kept as *.json.bak by
+    # atomic.write_json: right after a purge that copy still holds the item.
+    backups = sorted(info.dir.glob("*.json.bak"))
+    for path in history(info) + backups:
+        try:
+            data = json.loads(path.read_bytes())
+        except (OSError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        ciphers = data.get("ciphers")
+        if not isinstance(ciphers, list):
+            continue
+        kept = [c for c in ciphers if not (isinstance(c, dict) and c.get("id") == cid)]
+        if len(kept) != len(ciphers):
+            data["ciphers"] = kept
+            atomic.write_bytes(path, json.dumps(data, sort_keys=True).encode())
+            changed += 1
+    return changed
+
+
 def history(info: AccountInfo) -> list[Path]:
     return sorted((info.dir / "history").glob("*.json"), reverse=True)
 
@@ -462,6 +493,8 @@ class Session:
         try:
             refresh = crypto.decrypt_text(self.info.refresh_enc, self.user_key())
             tok = b.client.refresh(refresh)
+        except CryptoError as e:              # a stored token that does not decrypt
+            raise VaultError("relogin") from e
         except ApiError as e:
             if e.status in (400, 401):
                 raise VaultError("relogin") from e
@@ -555,6 +588,8 @@ class Session:
             raise VaultError("not_in_trash")
         self._call("delete_cipher", item.id)
         self.sync()
+        # Forever means forever on this disk too, not "until ten more saves".
+        forget_in_history(self.info, item.id)
 
     def create_folder(self, name: str) -> None:
         self._call("create_folder", crypto.encrypt_text(name, self.user_key()))

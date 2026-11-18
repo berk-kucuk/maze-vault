@@ -154,3 +154,27 @@ class AccountKeyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StrictTextTests(unittest.TestCase):
+    """V2: invalid UTF-8 is an error, not silently replaced characters that
+    the next save would write back for good."""
+
+    def test_invalid_utf8_raises(self):
+        key = crypto.SymmetricKey.generate()
+        es = str(crypto.encrypt(b"caf\xe9 \xff", key))
+        with self.assertRaises(crypto.CryptoError):
+            crypto.decrypt_text(es, key)
+
+    def test_valid_text_round_trips(self):
+        key = crypto.SymmetricKey.generate()
+        self.assertEqual(crypto.decrypt_text(crypto.encrypt_text("şifre ✓", key), key), "şifre ✓")
+
+    def test_item_with_bad_text_is_read_only(self):
+        from mazevault.core import items
+        key = crypto.SymmetricKey.generate()
+        raw = {"id": "i1", "type": 2, "name": str(crypto.encrypt(b"\xff\xfe", key)),
+               "notes": crypto.encrypt_text("ok", key), "secureNote": {"type": 0}}
+        it = items.decrypt_item(raw, lambda _org: key)
+        self.assertIn("name", it.damaged)
+        self.assertFalse(it.editable)

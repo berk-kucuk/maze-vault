@@ -76,6 +76,27 @@ class LocalVaultTests(TempHome):
         s.purge(s.items[it.id])
         self.assertEqual(s.items, {})
 
+    def test_purge_leaves_nothing_on_disk(self) -> None:
+        """V1: "delete forever" kept the item in up to ten history snapshots
+        and in the vault file's .bak. Its id must be nowhere on disk after."""
+        s = vault.create_local("Home", PW, FAST_ARGON)
+        keep = s.create(items.TYPE_NOTE, {"name": "Keep", "notes": "k"})
+        gone = s.create(items.TYPE_NOTE, {"name": "Gone", "notes": "g"})
+        for i in range(3):          # several snapshots that contain it
+            s.update(s.items[gone.id], {"name": "Gone", "notes": f"g{i}"})
+        s.trash(s.items[gone.id])
+        info = vault.list_accounts()[0]
+        def holders():
+            return [f.name for f in info.dir.rglob("*") if f.is_file()
+                    and gone.id.encode() in f.read_bytes()]
+        self.assertTrue(holders(), "test setup: the item should be on disk before")
+        s.purge(s.items[gone.id])
+        self.assertEqual(holders(), [], "the purged item is still on disk")
+        # Everything else is untouched: the other item and history still work.
+        self.assertTrue(any(keep.id.encode() in f.read_bytes() for f in vault.history(info)))
+        s2 = vault.unlock(info, PW)
+        self.assertEqual([i.name for i in s2.visible()], ["Keep"])
+
     def test_edit_keeps_history_and_snapshots(self) -> None:
         s = vault.create_local("Home", PW, FAST_ARGON)
         it = s.create(items.TYPE_LOGIN, {"name": "A", "login": {"password": "one"}})

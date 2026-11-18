@@ -5,7 +5,7 @@
 
 pkgname=maze-vault
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Maze Vault — a Bitwarden/Vaultwarden-compatible password manager (client only, no telemetry)"
 arch=('any')
 url="https://mazelinux.berkkucukk.com.tr"

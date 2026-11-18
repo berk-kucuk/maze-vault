@@ -258,7 +258,15 @@ def encrypt_text(text: str, key: SymmetricKey) -> str:
 
 
 def decrypt_text(es: str, key: SymmetricKey) -> str:
-    return decrypt(es, key).decode("utf-8", errors="replace")
+    # Strict (audit V2): with errors="replace" a field holding invalid UTF-8
+    # came back with U+FFFD in it, looked normal, and the next save wrote the
+    # replacement characters back — losing the original bytes for good. As an
+    # error, the field is marked damaged instead and the item stays read-only
+    # (items.decrypt_item), so nothing can overwrite it.
+    try:
+        return decrypt(es, key).decode("utf-8")
+    except UnicodeDecodeError as e:
+        raise CryptoError("bad_utf8") from e
 
 
 # ── account keys ─────────────────────────────────────────────────────────────
